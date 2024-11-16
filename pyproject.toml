@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "tyuiuprofile"
+version = "0.1.0"
+description = "Tyuiu service for applicants"
+authors = ["AndreyKosov <andrey.kosov.05@inbox.ru>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = {extras = ["all"], version = "^0.115.5"}
+sqlalchemy = "^2.0.36"
+asyncpg = "^0.30.0"
+alembic = "^1.14.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
