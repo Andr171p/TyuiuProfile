@@ -1,22 +1,10 @@
 from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, declared_attr
 
-from src.config import settings
-
-
-def get_db_url(
-        user: str = settings.db.user,
-        password: str = settings.db.password,
-        host: str = settings.db.host,
-        port: int = settings.db.port,
-        name: str = settings.db.name
-) -> str:
-    return f"postgresql+asyncpg://{user}:{password}@{host}:{port}/{name}"
-
-
-DB_URL: str = get_db_url()
-
 
 class Base(AsyncAttrs, DeclarativeBase):
     __abstract__ = True
 
+    @declared_attr.directive
+    def __tablename__(cls) -> str:
+        return f"{cls.__name__.lower()}s"
