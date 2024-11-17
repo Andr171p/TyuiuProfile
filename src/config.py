@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+from typing import List
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings
 
@@ -17,19 +18,19 @@ class DBSettings(BaseSettings):
     password: str = os.getenv('DB_PASSWORD')
 
 
-class APIServiceSettings(BaseSettings):
-    rec_sys: str = os.getenv('REC-SYS_API_URL')
-    classifier: str = os.getenv('CLASSIFIER_API_URL')
-
-
 class RecSysSettings(BaseSettings):
     url: str = os.getenv('REC-SYS_API_URL')
     endpoint: str = '/rec_sys/recommend/'
 
 
+class AppSettings(BaseSettings):
+    name: str = "Tyuiu-user-profile"
+    origins: List[str] = [""]
+
+
 class Settings(BaseSettings):
+    app: AppSettings = AppSettings()
     db: DBSettings = DBSettings()
-    api: APIServiceSettings = APIServiceSettings()
     rec_sys: RecSysSettings = RecSysSettings()
 
 

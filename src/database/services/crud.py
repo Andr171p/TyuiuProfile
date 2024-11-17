@@ -28,12 +28,6 @@ class CRUD(DBSession, Generic[ModelType]):
         async with self.session() as session:
             item = await session.execute(stmt)
             return item.scalar_one_or_none()
-
-    '''async def get(self, id: int) -> Optional[ModelType] | None:
-        stmt = select(self._model).where(self._model.id == id)
-        async with self.session() as session:
-            item = await session.execute(stmt)
-            return item.scalar_one_or_none()'''
         
     async def get_multi(
             self,

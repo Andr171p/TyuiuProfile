@@ -16,8 +16,7 @@ sys.path.insert(0, dirname(dirname(abspath(__file__))))
 
 from src.database.models.base import Base
 from src.database.options import DB_URL
-from src.database.models.user import UserModel
-from src.database.models.profile import ProfileModel
+from src.database.models.user import User
 
 config = context.config
 config.set_main_option("sqlalchemy.url", DB_URL)
