@@ -5,11 +5,10 @@ from sqlalchemy.dialects.postgresql import ARRAY
 from typing import List
 from datetime import datetime
 
-from src.database.models.abstract import Abstract
+from src.database.models.abstract import AbstractBase
 
 
-
-class User(Abstract):
+class UserModel(AbstractBase):
     first_name: Mapped[str] = mapped_column(nullable=False)
     last_name: Mapped[str] = mapped_column(nullable=False)
     surname: Mapped[str] = mapped_column(nullable=True)
@@ -25,6 +24,7 @@ class User(Abstract):
     exams: Mapped[List[str]] = mapped_column(ARRAY(String), nullable=True)
     education: Mapped[str] = mapped_column(nullable=True)
     study_form: Mapped[str] = mapped_column(nullable=True)
+    speciality: Mapped[str] = mapped_column(nullable=True)
 
     @mapped_column
     def full_name(cls) -> str:

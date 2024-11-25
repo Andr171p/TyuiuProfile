@@ -1,4 +1,5 @@
-from sqlalchemy import select, delete
+from sqlalchemy import Select
+from sqlalchemy import select, delete, insert, update
 from typing import Generic, List, Optional
 from functools import singledispatchmethod
 
@@ -24,7 +25,7 @@ class CRUD(DBSession, Generic[ModelType]):
             return item.scalar_one_or_none()
         
     @get.register
-    async def _(self, stmt: select[tuple]) -> Optional[ModelType] | None:
+    async def _(self, stmt: Select) -> Optional[ModelType] | None:
         async with self.session() as session:
             item = await session.execute(stmt)
             return item.scalar_one_or_none()
@@ -43,21 +44,23 @@ class CRUD(DBSession, Generic[ModelType]):
             return items.scalars().unique().all()
         
     async def create(self, item: ModelType) -> ModelType:
-        db_item = self._model(**item.dict())
         async with self.session() as session:
-            session.add(db_item)
+            stmt = insert(self._model).values(**item.__dict__).returning(self._model)
+            db_item = await session.execute(stmt)
+            db_item = db_item.fetchone()
             await session.flush()
             return db_item
         
-    async def update(
-            self,
-            db_item: ModelType,
-            item: ModelType
-    ) -> ModelType:
+    async def update(self, item: ModelType) -> ModelType:
         async with self.session() as session:
-            for field in db_item.__dict__:
-                if hasattr(item, field):
-                    setattr(db_item, field, getattr(item, field))
+            stmt = (
+                update(self._model)
+                .where(self._model.id == item.id)
+                .values(item.dict(exclude_unset=True))
+                .returning(self._model)
+            )
+            db_item = await session.execute(stmt)
+            db_item = db_item.fetchone()
             await session.flush()
             return db_item
         

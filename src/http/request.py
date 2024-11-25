@@ -1,53 +1,60 @@
+import asyncio
 import aiohttp
-
-from typing import Any, Dict
-
-from src.http.client import HTTPClient
+from queue import Queue
+from typing import Any, Dict, List, Optional
 
 
-class HTTPRequests(HTTPClient):
-    def __init__(self) -> None:
-        super().__init__()
-        self.session()
+class HTTPRequests:
+    @staticmethod
+    def is_ok(response: aiohttp.ClientResponse) -> bool:
+        return True if response.status == 200 else False
 
+    @classmethod
     async def get(
-            self,
+            cls,
             url: str,
-            params: Dict[str, Any] = None,
-            headers: Dict[str, str] = None,
-            cookies: Dict[str, str] = None,
-            allow_redirects: bool = True,
-            max_redirects: int = 30
-    ) -> aiohttp.ClientResponse:
-        async with self.request(
-            method="GET",
-            url=url,
-            params=params,
-            headers=headers,
-            cookies=cookies,
-            allow_redirects=allow_redirects,
-            max_redirects=max_redirects
-        ) as response:
-            return await response
-        
+            headers: Optional[Dict[str, str]] = None
+    ) -> Dict[str, str]:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(
+                url=url,
+                headers=headers
+            ) as response:
+                if cls.is_ok(response):
+                    return await response.json()
+
+    @classmethod
     async def post(
-            self,
+            cls,
             url: str,
-            data: Any = None,
-            json: Any = None,
-            headers: Dict[str, str] = None,
-            cookies: Dict[str, str] = None,
-            allow_redirects: bool = False,
-            max_redirects: int = 0
-    ) -> aiohttp.ClientResponse:
-        async with self.request(
-            method="POST",
-            url=url,
-            data=data,
-            json=json,
-            headers=headers,
-            cookies=cookies,
-            allow_redirects=allow_redirects,
-            max_redirects=max_redirects,
-        ) as response:
-            return await response
+            json: Dict[str, Any],
+            headers: Optional[Dict[str, str]] = None
+    ) -> Dict[str, str]:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                url=url,
+                json=json,
+                headers=headers
+            ) as response:
+                if cls.is_ok(response):
+                    return await response.json()
+
+    @classmethod
+    async def post_multi(
+            cls,
+            urls: List[str],
+            jsons: List[Dict[str, Any]]
+    ) -> Queue[Any]:
+        async with aiohttp.ClientSession() as session:
+            tasks = []
+            for url, json in zip(urls, jsons):
+                task = session.post(url=url, json=json)
+                tasks.append(task)
+            responses = await asyncio.gather(*tasks)
+            responses_queue = Queue()
+            for response in responses:
+                if cls.is_ok(response):
+                    responses_queue.put(await response.json())
+                else:
+                    responses_queue.put(None)
+            return responses_queue

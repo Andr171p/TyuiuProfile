@@ -4,6 +4,7 @@ from datetime import datetime
 
 
 class UserSchema(BaseModel):
+    id: int
     first_name: str
     last_name: str
     surname: str
